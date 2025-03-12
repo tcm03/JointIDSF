@@ -4,6 +4,7 @@ from torchcrf import CRF
 from transformers.models.roberta.modeling_roberta import RobertaModel, RobertaPreTrainedModel
 
 from .module import IntentClassifier, SlotClassifier
+import logging
 
 
 class JointPhoBERT(RobertaPreTrainedModel):
@@ -16,6 +17,8 @@ class JointPhoBERT(RobertaPreTrainedModel):
 
         self.intent_classifier = IntentClassifier(config.hidden_size, self.num_intent_labels, args.dropout_rate)
 
+        logging.info("@tcm: self.args.use_intent_context_concat: {self.args.use_intent_context_concat}")
+        logging.info("@tcm: self.args.use_intent_context_attention: {self.args.use_intent_context_attention}")
         self.slot_classifier = SlotClassifier(
             config.hidden_size,
             self.num_intent_labels,
