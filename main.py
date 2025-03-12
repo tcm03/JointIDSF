@@ -8,14 +8,14 @@ from utils import MODEL_CLASSES, MODEL_PATH_MAP, init_logger, load_tokenizer, se
 
 ##### LOGGING CONFIGURATION ####
 
-# Ensure logs directory exists
+# Create a directory for log files if it doesn't exist
 log_dir = "runtime_logs"
 os.makedirs(log_dir, exist_ok=True)
+
 # Generate a unique log filename using timestamp
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 log_filename = os.path.join(log_dir, f"run_{timestamp}.log")
 
-import logging
 # Create a logger
 tcm_logger = logging.getLogger("tcm_logger")
 tcm_logger.setLevel(logging.DEBUG)  # Capture all logs
@@ -24,14 +24,20 @@ tcm_logger.setLevel(logging.DEBUG)  # Capture all logs
 file_handler = logging.FileHandler(log_filename, mode="w")
 file_handler.setLevel(logging.DEBUG)  # Capture all log levels
 
+# Create a stream handler for logging to the terminal
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.DEBUG)  # Capture all log levels
+
 # Define log format
 formatter = logging.Formatter(
     "%(asctime)s - %(filename)s:%(lineno)d - %(funcName)s - %(levelname)s - %(message)s"
 )
 file_handler.setFormatter(formatter)
+stream_handler.setFormatter(formatter)
 
-# Add the file handler to the logger
+# Add handlers to the logger
 tcm_logger.addHandler(file_handler)
+tcm_logger.addHandler(stream_handler)
 
 # Prevent log propagation to the root logger
 tcm_logger.propagate = False
