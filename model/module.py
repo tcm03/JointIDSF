@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.init as init
 import logging
 logger = logging.getLogger("tcm_logger")
 
@@ -153,6 +154,23 @@ class SlotClassifier(nn.Module):
             bidirectional = True
         )
         self.linear = nn.Linear(2 * output_dim, num_slot_labels)
+
+        # Apply custom weight initialization
+        self.init_weights()
+
+    def init_weights(self):
+        for name, param in self.slot_lstm.named_parameters():
+            # if 'weight_ih' in name:
+            #     init.xavier_uniform_(param.data)
+            # elif 'weight_hh' in name:
+            #     init.orthogonal_(param.data)
+            if 'weight' in name:
+                init.xavier_normal_(param.data)
+            elif 'bias' in name:
+                param.data.fill_(0)
+                # Set forget gate bias to 1
+                # n = param.size(0)
+                # param.data[n // 4:n // 2].fill_(1)
 
     def forward(self, x, intent_context, attention_mask):
         # x: contextualized emb from pretrained LLM (ci)
