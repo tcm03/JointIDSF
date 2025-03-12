@@ -1,5 +1,5 @@
 import argparse
-
+import logging
 from data_loader import load_and_cache_examples
 from trainer import Trainer
 from utils import MODEL_CLASSES, MODEL_PATH_MAP, init_logger, load_tokenizer, set_seed
@@ -134,6 +134,8 @@ if __name__ == "__main__":
     parser.add_argument("--use_attention_mask", action="store_true", help="Whether to use attention mask")
 
     args = parser.parse_args()
+    logging.info(f"@tcm: In main: use_intent_context_concat: {args.use_intent_context_concat}")
+    logging.info(f"@tcm: In main: use_intent_context_attention: {args.use_intent_context_attention}")
 
     args.model_name_or_path = MODEL_PATH_MAP[args.model_type]
     main(args)
