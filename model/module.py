@@ -48,6 +48,11 @@ class Attention(nn.Module):
             * **weights** (:class:`torch.FloatTensor` [batch size, output length, query length]):
               Tensor containing attention weights.
         """
+
+        # @tcm
+        # query: contextualized emb from pretrained LLM (ci)
+        # context: w = Wp where p is probabilities vector from IntentClassifier (after softmax)
+
         # query = self.linear_query(query)
 
         batch_size, output_len, hidden_size = query.size()
@@ -135,10 +140,25 @@ class SlotClassifier(nn.Module):
             # self.linear_out = nn.Linear(2 * intent_embedding_size, intent_embedding_size)
         # output
         self.dropout = nn.Dropout(dropout_rate)
-        self.linear = nn.Linear(output_dim, num_slot_labels)
+        # @tcm: try replacing the ffn with LSTM+ffn for slot classification
+        # self.linear = nn.Linear(output_dim, num_slot_labels)
+        self.slot_lstm = nn.LSTM(
+            input_size = output_dim,
+            hidden_size = output_dim,
+            num_layers = 1,
+            bias = True,
+            batch_first = True,
+            dropout = 0,
+            bidirectional = True
+        )
+        self.linear = nn.Linear(2 * output_dim, num_slot_labels)
 
     def forward(self, x, intent_context, attention_mask):
+        # x: contextualized emb from pretrained LLM (ci)
+        # intent_context: logits from IntentClassifier (pi)
         x = self.linear_slot(x)
+        lstm_h0 = None
+        lstm_c0 = None
         if self.use_intent_context_concat:
             intent_context = self.softmax(intent_context)
             intent_context = self.linear_intent_context(intent_context)
@@ -150,8 +170,15 @@ class SlotClassifier(nn.Module):
         elif self.use_intent_context_attn:
             intent_context = self.softmax(intent_context)
             intent_context = self.linear_intent_context(intent_context)
+            lstm_h0 = intent_context.unsqueeze(0).expand(2, -1, -1).contiguous()
+            lstm_c0 = intent_context.unsqueeze(0).expand(2, -1, -1).contiguous()
             intent_context = torch.unsqueeze(intent_context, 1)  # 1: query length (each token)
             output, weights = self.attention(x, intent_context, attention_mask)
             x = output
         x = self.dropout(x)
-        return self.linear(x)
+        # @tcm: try replacing the ffn with LSTM+ffn for slot classification
+        # final_output = self.linear(x)
+        final_output, _, _ = self.slot_lstm(x, lstm_h0, lstm_c0)
+        final_output = self.linear(final_output)
+        
+        return final_output
