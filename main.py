@@ -1,9 +1,49 @@
 import argparse
 import logging
+import os
+import datetime
 from data_loader import load_and_cache_examples
 from trainer import Trainer
 from utils import MODEL_CLASSES, MODEL_PATH_MAP, init_logger, load_tokenizer, set_seed
 
+##### LOGGING CONFIGURATION ####
+
+# Ensure logs directory exists
+log_dir = "runtime_logs"
+os.makedirs(log_dir, exist_ok=True)
+# Generate a unique log filename using timestamp
+timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+log_filename = os.path.join(log_dir, f"run_{timestamp}.log")
+
+import logging
+# Create a logger
+tcm_logger = logging.getLogger("tcm_logger")
+tcm_logger.setLevel(logging.DEBUG)  # Capture all logs
+
+# Create a file handler for logging
+file_handler = logging.FileHandler(log_filename, mode="w")
+file_handler.setLevel(logging.DEBUG)  # Capture all log levels
+
+# Define log format
+formatter = logging.Formatter(
+    "%(asctime)s - %(filename)s:%(lineno)d - %(funcName)s - %(levelname)s - %(message)s"
+)
+file_handler.setFormatter(formatter)
+
+# Add the file handler to the logger
+tcm_logger.addHandler(file_handler)
+
+# Prevent log propagation to the root logger
+tcm_logger.propagate = False
+
+#hf_logger = hf_logging.get_logger("transformers")
+#hf_logger.setLevel(logging.INFO)  # Ensure it logs debug messages
+#
+## Attach the same file handler to Hugging Face's logger
+#hf_logger.addHandler(file_handler)
+#hf_logger.propagate = False  # Prevent duplicate logs
+
+##### DONE LOGGING CONFIGURATION ####
 
 def main(args):
     init_logger()
@@ -134,8 +174,8 @@ if __name__ == "__main__":
     parser.add_argument("--use_attention_mask", action="store_true", help="Whether to use attention mask")
 
     args = parser.parse_args()
-    logging.info(f"@tcm: In main: use_intent_context_concat: {args.use_intent_context_concat}")
-    logging.info(f"@tcm: In main: use_intent_context_attention: {args.use_intent_context_attention}")
+    tcm_logger.info(f"@tcm: In main: use_intent_context_concat: {args.use_intent_context_concat}")
+    tcm_logger.info(f"@tcm: In main: use_intent_context_attention: {args.use_intent_context_attention}")
 
     args.model_name_or_path = MODEL_PATH_MAP[args.model_type]
     main(args)

@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import logging
+logger = logging.getLogger("tcm_logger")
 
 class Attention(nn.Module):
     """Applies attention mechanism on the `context` using the `query`.
@@ -159,12 +160,12 @@ class SlotClassifier(nn.Module):
         x = self.linear_slot(x)
         lstm_h0 = None
         lstm_c0 = None
-        logging.info(f"@tcm: use_intent_context_concat: {self.use_intent_context_concat}")
-        logging.info(f"@tcm: use_intent_context_attn: {self.use_intent_context_attn}")
+        logger.info(f"@tcm: use_intent_context_concat: {self.use_intent_context_concat}")
+        logger.info(f"@tcm: use_intent_context_attn: {self.use_intent_context_attn}")
         if self.use_intent_context_concat:
             intent_context = self.softmax(intent_context)
             intent_context = self.linear_intent_context(intent_context)
-            logging.info(f"@tcm: intent_context: {intent_context}")
+            logger.info(f"@tcm: intent_context: {intent_context}")
             lstm_h0 = intent_context.unsqueeze(0).expand(2, -1, -1).contiguous()
             lstm_c0 = intent_context.unsqueeze(0).expand(2, -1, -1).contiguous()
             intent_context = torch.unsqueeze(intent_context, 1)
@@ -175,7 +176,7 @@ class SlotClassifier(nn.Module):
         elif self.use_intent_context_attn:
             intent_context = self.softmax(intent_context)
             intent_context = self.linear_intent_context(intent_context)
-            logging.info(f"@tcm: intent_context: {intent_context}")
+            logger.info(f"@tcm: intent_context: {intent_context}")
             lstm_h0 = intent_context.unsqueeze(0).expand(2, -1, -1).contiguous()
             lstm_c0 = intent_context.unsqueeze(0).expand(2, -1, -1).contiguous()
             intent_context = torch.unsqueeze(intent_context, 1)  # 1: query length (each token)
@@ -184,8 +185,8 @@ class SlotClassifier(nn.Module):
         x = self.dropout(x)
         # @tcm: try replacing the ffn with LSTM+ffn for slot classification
         # final_output = self.linear(x)
-        logging.info(f"@tcm: lstm_h0: {lstm_h0}")
-        logging.info(f"@tcm: lstm_c0: {lstm_c0}")
+        logger.info(f"@tcm: lstm_h0: {lstm_h0}")
+        logger.info(f"@tcm: lstm_c0: {lstm_c0}")
         final_output, _ = self.slot_lstm(x, (lstm_h0, lstm_c0))
         final_output = self.linear(final_output)
         

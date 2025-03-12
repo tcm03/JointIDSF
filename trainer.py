@@ -11,7 +11,7 @@ from transformers import AdamW, get_linear_schedule_with_warmup
 from utils import MODEL_CLASSES, compute_metrics, get_intent_labels, get_slot_labels
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("tcm_logger")
 
 
 class Trainer(object):
@@ -19,8 +19,8 @@ class Trainer(object):
         
         self.args = args
 
-        logging.info(f"@tcm: In Trainer: self.args.use_intent_context_concat: {self.args.use_intent_context_concat}")
-        logging.info(f"@tcm: In Trainer: self.args.use_intent_context_attention: {self.args.use_intent_context_attention}")
+        logger.info(f"@tcm: In Trainer: self.args.use_intent_context_concat: {self.args.use_intent_context_concat}")
+        logger.info(f"@tcm: In Trainer: self.args.use_intent_context_attention: {self.args.use_intent_context_attention}")
         
         self.train_dataset = train_dataset
         self.dev_dataset = dev_dataset

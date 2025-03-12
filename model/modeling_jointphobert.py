@@ -5,6 +5,7 @@ from transformers.models.roberta.modeling_roberta import RobertaModel, RobertaPr
 
 from .module import IntentClassifier, SlotClassifier
 import logging
+logger = logging.getLogger("tcm_logger")
 
 
 class JointPhoBERT(RobertaPreTrainedModel):
@@ -17,8 +18,8 @@ class JointPhoBERT(RobertaPreTrainedModel):
 
         self.intent_classifier = IntentClassifier(config.hidden_size, self.num_intent_labels, args.dropout_rate)
 
-        logging.info(f"@tcm: In JointPhoBERT: self.args.use_intent_context_concat: {self.args.use_intent_context_concat}")
-        logging.info(f"@tcm: In JointPhoBERT: self.args.use_intent_context_attention: {self.args.use_intent_context_attention}")
+        logger.info(f"@tcm: In JointPhoBERT: self.args.use_intent_context_concat: {self.args.use_intent_context_concat}")
+        logger.info(f"@tcm: In JointPhoBERT: self.args.use_intent_context_attention: {self.args.use_intent_context_attention}")
         self.slot_classifier = SlotClassifier(
             config.hidden_size,
             self.num_intent_labels,
