@@ -16,7 +16,12 @@ logger = logging.getLogger(__name__)
 
 class Trainer(object):
     def __init__(self, args, train_dataset=None, dev_dataset=None, test_dataset=None):
+        
         self.args = args
+
+        logging.info(f"@tcm: In Trainer: self.args.use_intent_context_concat: {self.args.use_intent_context_concat}")
+        logging.info(f"@tcm: In Trainer: self.args.use_intent_context_attention: {self.args.use_intent_context_attention}")
+        
         self.train_dataset = train_dataset
         self.dev_dataset = dev_dataset
         self.test_dataset = test_dataset
